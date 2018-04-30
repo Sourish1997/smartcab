@@ -40,6 +40,15 @@ class LearningAgent(Agent):
         # Update additional class parameters as needed
         # If 'testing' is True, set epsilon and alpha to 0
 
+        if self.epsilon - 0.05 >= 0:
+            self.epsilon -= 0.05
+        else:
+            self.epsilon = 0
+
+        if testing:
+            self.epsilon = 0
+            self.alpha = 0
+
         return None
 
     def build_state(self):
@@ -77,6 +86,10 @@ class LearningAgent(Agent):
         # Calculate the maximum Q-value of all actions for a given state
 
         maxQ = None
+        
+        for action, Q in self.Q[state].items():
+            if maxQ == None or maxQ < Q:
+                maxQ = Q
 
         return maxQ 
 
@@ -90,6 +103,9 @@ class LearningAgent(Agent):
         # When learning, check if the 'state' is not in the Q-table
         # If it is not, create a new dictionary for that state
         #   Then, for each action available, set the initial Q-value to 0.0
+
+        if self.learning and not(state in self.Q.keys()):
+            self.Q[state] = {'forward': 0.0, 'left': 0.0, 'right': 0.0, None: 0.0}
 
         return
 
@@ -110,8 +126,16 @@ class LearningAgent(Agent):
         # When learning, choose a random action with 'epsilon' probability
         # Otherwise, choose an action with the highest Q-value for the current state
         # Be sure that when choosing an action with highest Q-value that you randomly select between actions that "tie".
-
-        action = random.choice(self.valid_actions)
+        
+        if self.learning:
+            if random.random() < self.epsilon:
+                action = random.choice(self.valid_actions)
+            else:
+                maxQ = self.get_maxQ(state)
+                max_actions =  [action for action, Q in self.Q[state].items() if Q == maxQ]
+                action = random.choice(max_actions)
+        else:
+            action = random.choice(self.valid_actions)
 
         return action
 
@@ -126,6 +150,8 @@ class LearningAgent(Agent):
         ###########
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
+        
+        self.Q[state][action] = (1.0 - self.alpha) * self.Q[state][action] +  self.alpha * reward
 
         return
 
@@ -162,13 +188,13 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent)
+    agent = env.create_agent(LearningAgent, learning = True)
     
     ##############
     # Follow the driving agent
     # Flags:
     #   enforce_deadline - set to True to enforce a deadline metric
-    env.set_primary_agent(agent)
+    env.set_primary_agent(agent, enforce_deadline = True)
 
     ##############
     # Create the simulation
@@ -177,14 +203,14 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env)
+    sim = Simulator(env, update_delay = 0.01, log_metrics = True)
     
     ##############
     # Run the simulator
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run()
+    sim.run(n_test = 10)
 
 
 if __name__ == '__main__':
