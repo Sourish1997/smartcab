@@ -23,6 +23,8 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
         # Set any additional class parameters as needed
+        
+        self.trial_count = 0
 
 
     def reset(self, destination=None, testing=False):
@@ -40,10 +42,24 @@ class LearningAgent(Agent):
         # Update additional class parameters as needed
         # If 'testing' is True, set epsilon and alpha to 0
 
-        if self.epsilon - 0.05 >= 0:
-            self.epsilon -= 0.05
-        else:
-            self.epsilon = 0
+        # Linear epsilon decay for simple Q-learning agent
+        #if self.epsilon - 0.05 >= 0:
+        #    self.epsilon -= 0.05
+        #else:
+        #    self.epsilon = 0
+        
+        # Exponential epsilon decay for optimized Q-learning agent: e = exp(-0.01t)
+        self.epsilon = math.exp(-0.01 * self.trial_count)
+        
+        # Bounded exponential decay for alpha: did not improve performance significantly
+        #if self.alpha > 0.2:
+        #    self.alpha = math.exp(-0.01 * self.trial_count)
+        #if self.alpha > 0.6:
+        #    self.alpha = 0.6
+        #if self.alpha < 0.2:
+        #    self.alpha = 0.2
+            
+        self.trial_count += 1
 
         if testing:
             self.epsilon = 0
@@ -203,14 +219,14 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env, update_delay = 0.01, log_metrics = True)
+    sim = Simulator(env, update_delay = 0.01, display = False, log_metrics = True, optimized = True)
     
     ##############
     # Run the simulator
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test = 10)
+    sim.run(n_test = 50)
 
 
 if __name__ == '__main__':
