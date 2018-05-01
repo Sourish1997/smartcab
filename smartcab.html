@@ -16373,7 +16373,7 @@ J1hmZmZmZmYV4gTLzMzMzMysQpxgmZmZmZmZVcj/B8/oBlRXJlaQAAAAAElFTkSuQmCC
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer:</strong></p>
 <p>The optimal policy for our agent can be summarized as follows:</p>
-<p>If the agent needs to go forward, it should do so if the light is green, else wait. When the agent needs to take a right turn, it should wait if there is a car to the agent's left moving forward, else it should take the turn. If the agent needs to take a left turn, it should wait if the light is red. It should also wait if the light is green and there is oncoming traffic that is moving forward or taking a right turn. It should take the left turn if the light is green and there is no oncoming traffic or the oncoming traffic is moving left.</p>
+<p>If the agent needs to go forward, it should do so if the light is green, else wait. When the agent needs to take a right turn, it should wait if the light is red and there is a car to the agent's left moving forward, else it should take the turn. If the agent needs to take a left turn, it should wait if the light is red. It should also wait if the light is green and there is oncoming traffic that is moving forward or taking a right turn. It should take the left turn if the light is green and there is no oncoming traffic or the oncoming traffic is moving left.</p>
 <p>The policy in 'sim_improved-learning.txt' is near optimal since most of it is consistent with our optimal policy. For example:</p>
 <p>('forward', 'red', 'right', None)<br>
  -- forward : -9.71<br>
@@ -16381,12 +16381,12 @@ J1hmZmZmZmYV4gTLzMzMzMysQpxgmZmZmZmZVcj/B8/oBlRXJlaQAAAAAElFTkSuQmCC
  -- None : 1.73<br>
  -- left : -5.46<br></p>
 <p>When the waypoint is 'forward' and the traffic light is red, the agent should not move. This is correctly represented as the 'None' action has the highest value for this state. Another example is:</p>
-<p>('forward', 'red', 'forward', 'forward')<br>
- -- forward : -30.63<br>
- -- right : -10.33<br>
- -- None : 1.67<br>
- -- left : -20.18<br></p>
-<p>Here, the agent wants to move left, but there is an agent to its left moving forward. If the agent moves right, it will cause an accident. Hence, the optimal policy is to wait. This is correctly represented as the 'None' action has the highest value for the state.</p>
+<p>('right', 'red', 'forward', None)<br>
+ -- forward : -34.84<br>
+ -- right : -19.76<br>
+ -- None : 0.34<br>
+ -- left : -38.55<br></p>
+<p>Here, the agent wants to move right, but there is an agent to its left moving forward. If the agent moves right, it will cause an accident. Hence, the optimal policy is to wait. This is correctly represented as the 'None' action has the highest value for the state.</p>
 <p>In some cases, our learnt policy differs from the optimal policy. For example:</p>
 <p>('right', 'red', 'left', 'right')<br>
  -- forward : -5.34<br>
@@ -16425,7 +16425,12 @@ J1hmZmZmZmYV4gTLzMzMzMysQpxgmZmZmZmZVcj/B8/oBlRXJlaQAAAAAElFTkSuQmCC
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer:</strong></p>
-<p>The main goal of the smartcab is to learn to obey traffic rules and move towards its destination. Each of these goals deal with only one state at a time, and hence future rewards become insignificant. The act of obeying the traffic rules at a  junction is in no way influenced by the state in future junctions that might be encountered by the smartcab. Also, the direction in which to move is also implicitly provided to us in the state, thus simplifying the task of reaching the destination and making the task learnable without referring future states. Because of these reasons, future rewards are insignificant for this project.</p>
+<ol>
+<li><p>The main goal of the smartcab is to learn to obey traffic rules and move towards its destination. Each of these goals can be learnt from the immediate reward, and hence future rewards become insignificant. The smartcab has an egocentric view and can only see the light and traffic for the immediate intersection. The smartcab cannot plan in advance for possible future actions, and hence future rewards are not valid in the given scenario.<br><br></p>
+</li>
+<li><p>The environment destination changes at every trial. Hence, if we were to use a Q-learning update rule that incorporates future rewards, we would in essence be propagating back rewards from every intersection that was once a destination. Because of this, incorporating future rewards will not work for this project.</p>
+</li>
+</ol>
 
 </div>
 </div>
